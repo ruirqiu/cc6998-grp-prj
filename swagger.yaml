@@ -1,0 +1,255 @@
+swagger: '2.0'
+info:
+  title: Find !t API
+  description: 'A one-click purchase routing planner'
+  version: 1.0.0
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /planRoute:
+    post:
+      summary: The endpoint to input query for a suggested route going through all the stores according to shopping list (shopping cart).
+      description: |
+        The endpoint to input query for a suggested route going through all the stores according to shopping list (shopping cart), where all the items could be purchased in a reasonabnle time and reasonable expenses. The API makes use of store inventory API and external map API from which the store we're going to and how the route is planned is implemented.
+      tags:
+        - Routing
+      operationId: route
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RouteRequest'
+      responses:
+        '200':
+          description: A route response
+          schema:
+            $ref: '#/definitions/RouteResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /search:
+    post:
+      summary: The endpoint to search items which could be added to the shopping list.
+      description: |
+        The endpoint for to search items which could be added to the shopping list.
+      tags:
+        - Searching
+      operationId: searchItem
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SearchRequest'
+      responses:
+        '200':
+          description: A Search response
+          schema:
+            $ref: '#/definitions/SearchResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /addToCart:
+    post:
+      summary: The endpoint to add items to the shopping list (shopping cart).
+      description: |
+        The endpoint for to add items to the shopping list (shopping cart) with the help of DB API.
+      tags:
+        - Add to cart
+      operationId: addToCart
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AddRequest'
+      responses:
+        '200':
+          description: An add response
+          schema:
+            $ref: '#/definitions/AddResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /history:
+    get:
+      summary: The endpoint to get planning history.
+      description: |
+        The endpoint to get planning history with the help of external DB API.
+      tags:
+        - History
+      operationId: history
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/HistoryRequest'
+      responses:
+        '200':
+          description: A history route response
+          schema:
+            $ref: '#/definitions/HistoryResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+ 
+definitions:
+  RouteRequest:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/RoutingMessage'
+  RouteResponse:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/RoutingResult'
+  SearchRequest:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/SearchingMessage'
+  SearchResponse:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/SearchingResult'
+  HistoryRequest:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/RoutingMessage'
+  HistoryResponse:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/RoutingResult'
+  AddRequest:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/AddMessage'
+  AddResponse:
+    type: object
+    properties:
+      messages:
+        type: array
+        items:
+          $ref: '#/definitions/AddResult'
+  RoutingResult:
+    type: object
+    properties:
+      type:
+        type: string
+      url:
+        type: string
+      unstructured:
+        $ref: '#/definitions/RoutingMessage'
+  RoutingMessage:
+    type: object
+    properties:
+      userId:
+        type: string
+      planningType:
+        type: string
+      timestamp:
+        type: string
+        format: datetime
+  SearchingResult:
+    type: object
+    properties:
+      userId:
+        type: string
+      items:
+        type: object
+      timestamp:
+        type: string
+        format: datetime
+  SearchingMessage:
+    type: object
+    properties:
+      userId:
+        type: string
+      keyword:
+        type: string
+      timestamp:
+        type: string
+        format: datetime
+  AddResult:
+    type: object
+    properties:
+      userId:
+        type: string
+      itemKey:
+        type: string
+      timestamp:
+        type: string
+        format: datetime
+      unstructured:
+        $ref: '#/definitions/AddMessage'
+  AddMessage:
+    type: object
+    properties:
+      userId:
+        type: string
+      itemKey:
+        type: string
+      timestamp:
+        type: string
+        format: datetime
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+  
