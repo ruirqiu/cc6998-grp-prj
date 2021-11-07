@@ -39,7 +39,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   /search:
-    post:
+    get:
       summary: The endpoint to search items which could be added to the shopping list.
       description: |
         The endpoint for to search items which could be added to the shopping list.
@@ -49,16 +49,48 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: body
-          in: body
+        - in: query
+          name: itemName
           required: true
-          schema:
-            $ref: '#/definitions/SearchRequest'
+          type: string
+        - in: query
+          name: location
+          required: true
+          type: string
       responses:
         '200':
           description: A Search response
           schema:
             $ref: '#/definitions/SearchResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /getCart:
+    get:
+      summary: The endpoint to get the shopping cart of a user.
+      description: |
+        The endpoint for to search items which could be added to the shopping list.
+      tags:
+        - Get shopping cart
+      operationId: getCart
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: userID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A cart response
+          schema:
+            $ref: '#/definitions/Cart'
         '403':
           description: Unauthorized
           schema:
@@ -107,11 +139,14 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: body
-          in: body
+        - in: query
+          name: userId
           required: true
-          schema:
-            $ref: '#/definitions/HistoryRequest'
+          type: string
+        - in: query
+          name: timeStamp
+          type: string
+          format: datetime
       responses:
         '200':
           description: A history route response
@@ -141,13 +176,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/RoutingResult'
-  SearchRequest:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/SearchingMessage'
   SearchResponse:
     type: object
     properties:
@@ -155,13 +183,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/SearchingResult'
-  HistoryRequest:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/RoutingMessage'
   HistoryResponse:
     type: object
     properties:
@@ -199,6 +220,8 @@ definitions:
         type: string
       planningType:
         type: string
+      location:
+        type: string
       timestamp:
         type: string
         format: datetime
@@ -209,16 +232,6 @@ definitions:
         type: string
       items:
         type: object
-      timestamp:
-        type: string
-        format: datetime
-  SearchingMessage:
-    type: object
-    properties:
-      userId:
-        type: string
-      keyword:
-        type: string
       timestamp:
         type: string
         format: datetime
@@ -244,6 +257,18 @@ definitions:
       timestamp:
         type: string
         format: datetime
+  Cart:
+    type: object
+    properties:
+      userId:
+        type: string
+      itemKeys:
+        type: array
+        items:
+          type: string
+      timestamp:
+        type: string
+        format: datetime
   Error:
     type: object
     properties:
@@ -252,4 +277,4 @@ definitions:
         format: int32
       message:
         type: string
-  
+   
