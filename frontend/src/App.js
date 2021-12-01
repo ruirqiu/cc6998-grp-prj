@@ -1,10 +1,9 @@
 import React from 'react'
-import Search from './components/Search'
+import Search from './components/Search/Search'
 
 function App() {
   return (
     <>
-      <div>Hello World</div>
       <Search />
     </>
 
