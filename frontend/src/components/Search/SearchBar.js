@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
@@ -6,18 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import './Search.css'
 
-function SearchBar () {
-
-  const [query, setQuery] = useState("")
-
-  const onChange = e => {
-    setQuery(e.target.value)
-  }
-
-  const onSubmit = e => {
-    e.preventDefault()
-    console.log(query)
-  }
+function SearchBar ({onClick, onChange}) {
 
   return (
     <Paper
@@ -32,7 +21,7 @@ function SearchBar () {
         inputProps={{ 'aria-label': 'search google maps' }}
       />
       <Divider sx={{ height: 36, m: 0.5 }} orientation="vertical" />
-      <IconButton type="submit" sx={{ p: '10px' }} aria-label="search" onClick={onSubmit}>
+      <IconButton type="submit" sx={{ p: '10px' }} aria-label="search" onClick={onClick}>
         <SearchIcon />
       </IconButton>
     </Paper>
