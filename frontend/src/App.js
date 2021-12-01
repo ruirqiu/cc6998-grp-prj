@@ -1,8 +1,7 @@
 import React from 'react'
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-// import Search from './components/Search/Search'
+import Search from './components/Search/Search'
 
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 
 Amplify.configure({
@@ -17,7 +16,7 @@ function App() {
   return (
     <>
       <AmplifySignOut />
-      {/* <Search /> */}
+      <Search />
     </>
 
   );
