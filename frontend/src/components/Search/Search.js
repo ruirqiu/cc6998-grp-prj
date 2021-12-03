@@ -7,6 +7,7 @@ function Search () {
 
   const [query, setQuery] = useState("");
   const [user, setUser] = useState(null);
+  const [items, setItems] = useState(null);
 
   const onChange = e => {
     setQuery(e.target.value);
@@ -18,13 +19,12 @@ function Search () {
     .catch(err => console.log(err));
   }
 
-  const onClick = e => {
+  const onClick = async(e) => {
     e.preventDefault();
     console.log(query);
 
     if (user) {
       const idToken = user["signInUserSession"]["idToken"]["jwtToken"];
-      console.log(idToken);
       const config = {
         headers:{
             "Content-Type": 'application/json',
@@ -34,13 +34,18 @@ function Search () {
           'itemName': query,
         }
       };
+
       const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/search';
-      axios.get(url, config)
-      .then(res => console.log(res))
+      await axios.get(url, config)
+      .then(res => {
+        setItems(res.data);
+      })
       .catch((error) => {
         console.log(error);
       });
+    console.log(items);
     }
+
   };
 
   return (
