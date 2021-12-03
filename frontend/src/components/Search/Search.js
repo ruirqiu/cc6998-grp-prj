@@ -19,6 +19,7 @@ function Search() {
     setQuery(e.target.value);
   }
 
+// eslint-disable-next-line
   const updateSearch = async (idToken) => {
     const config = {
       headers: {

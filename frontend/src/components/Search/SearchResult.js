@@ -19,10 +19,6 @@ function SearchResult({ email, idToken, itemList }) {
     const config = {
       headers: {
         "Content-Type": 'application/json',
-        "Content-Type": 'application/json',
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "*",
         "Authorization": idToken
       },
       params: {
@@ -32,7 +28,7 @@ function SearchResult({ email, idToken, itemList }) {
     };
 
     const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/addToCart';
-    await axios.post(url, config)
+    await axios.get(url, config)
       .then(res => {
         console.log(res.data);
       })

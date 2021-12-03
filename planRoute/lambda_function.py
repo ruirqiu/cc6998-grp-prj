@@ -24,11 +24,12 @@ keywords = [ 'pear', 'pen','water', 'coffee', 'ham','tea','bread',  'milk', 'cra
     'blueberry','blackberry','mango','oil','salt', 'pepper','sugar','baking sheet','tin roll','foil',
     'syrup','honey','flower','flour','paper','pan','lemon','corn', 'cucumber','potato',
     'carrot','cauliflower','broccoli', 'beans', 'mushroom','rice', 'pasta','lettuce', 'asparagus', 'onion',
-    'cabbage','dressing','egg','butter','cheese','juice']
+    'cabbage','dressing','egg','butter','cheese','juice', 'bear', 'beer', 'wine', 'shirt',
+    'raspberry', 'strawberry', 'screwdriver', 'wrench', 'soap', 'soup', 'towel', 'pistol', 'bag', 'fork']
           
 # TODO hardcoded now
-STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords, 'Whole Foods':keywords[20:],
-        'Trader Joes':keywords[:15],'Wegmans Store':keywords[13:30], 'Wine Store':['water','tea','coffee','syrup','honey','lemon','juice'] }
+STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords[:45], 'Whole Foods':keywords[20:40],
+        'Trader Joes':keywords[:15],'Wegmans Store':keywords[13:30], 'Wine Store':['water','tea','coffee','syrup','honey','lemon','juice','beer','wine'] }
 
 # Walmart lowest for first 40, same last 6
 # Wegman highest for all
@@ -201,7 +202,8 @@ def compare_price(lowest, highest, price, keyword):
         heapq.heappush(price_list, (highest,'Wegmans Store'))
     
     # Target correct price
-    heapq.heappush(price_list, (price,'Target'))
+    if keyword in STORE_KEYWORD_MAPPING['Target']:
+        heapq.heappush(price_list, (price,'Target'))
     
     # Whole Foods + 0.9
     if keyword in STORE_KEYWORD_MAPPING['Whole Foods']:
@@ -234,7 +236,8 @@ def find_price(lowest, highest, price, keyword):
         price_list['Wegmans Store']=highest
     
     # Target correct price
-    price_list['Target']=price
+    if keyword in STORE_KEYWORD_MAPPING['Target']:
+        price_list['Target']=price
     
     # Whole Foods + 0.9
     if keyword in STORE_KEYWORD_MAPPING['Whole Foods']:
@@ -260,7 +263,10 @@ def find_cheapest(item_details, short_list):
     duplicate_check = {}
     
     for item in item_details:
-        price_range, price_s, title, tcin, keyword = item['price_range'], item['price'], item['title'], item['id'], item['keyword']
+        price_range , price_s, title, tcin, keyword = "", item['price'], item['title'], item['id'], item['keyword']
+        if 'price_range' in item:
+            price_range = item['price_range']
+            
         if " - " in price_range:
             lowest_s, highest_s = price_range.split(" - ")
         elif "-" in price_range:
@@ -329,7 +335,10 @@ def find_shortest(item_details, short_list):
     duplicate_check = {}
     for item in item_details:
         
-        price_range, price_s, title, tcin, keyword = item['price_range'], item['price'], item['title'], item['id'], item['keyword']
+        price_range , price_s, title, tcin, keyword = "", item['price'], item['title'], item['id'], item['keyword']
+        if 'price_range' in item:
+            price_range = item['price_range']
+            
         if " - " in price_range:
             lowest_s, highest_s = price_range.split(" - ")
         elif "-" in price_range:
@@ -483,10 +492,7 @@ def lambda_handler(event, context):
     print("===================route======================")
     #print(result)
     print(total_price_dollar, total_duration_min, total_distance_mile)
-    
-    # clear cart
-    response = clear_cart(user_id)
-    print(response)
+
     
     # put history
     route_string = json.dumps(route_dict)
@@ -495,6 +501,12 @@ def lambda_handler(event, context):
     
     return_results = {
         'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*"
+        }, 
         'body': {
             "total_price_dollar": total_price_dollar,
             "total_duration_min": total_duration_min,
