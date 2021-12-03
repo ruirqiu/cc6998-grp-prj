@@ -1,6 +1,31 @@
 .searchBarContainer {
+  margin-top: 100px;
+}
+
+.searchBar {
   height: 50px;
   margin: auto;
-  margin-top: 100px;
   width: 60%;
+}
+
+.searchResultContainer {
+  margin-top: 50px;
+}
+
+.searchResult {
+  width: 80%;
+  margin: auto;
+  margin-top: 20px;
+  color: black;
+  background-color: white;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.imageContainer {
+  max-width: 100px;
+  max-height: 100px;
 }

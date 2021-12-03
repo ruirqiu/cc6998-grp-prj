@@ -6,16 +6,16 @@ import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import './Search.css'
 
-function SearchBar ({onClick, onChange}) {
+function SearchBar({ onClick, onChange }) {
 
   return (
     <Paper
       component="form"
-      className='searchBarContainer'
+      className='searchBar'
       sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}
     >
       <InputBase
-      onChange={onChange}
+        onChange={onChange}
         sx={{ ml: 1, flex: 1 }}
         placeholder="Search Product Name"
         inputProps={{ 'aria-label': 'search google maps' }}
