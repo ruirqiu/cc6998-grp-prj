@@ -1,61 +1,68 @@
 import React, { useState } from 'react'
 import SearchBar from './SearchBar'
+import SearchResult from './SearchResult'
 import { Auth } from 'aws-amplify';
 import axios from 'axios';
 
-function Search () {
+function Search() {
 
   const [query, setQuery] = useState("");
   const [user, setUser] = useState(null);
-  // const idToken = user["signInUserSession"]["accessToken"]["jwtToken"];
-  // const additionalParams = {
-  //   //If there are any unmodeled query parameters or headers that need to be sent with the request you can add them here
-  //   'headers': {
-  //       'Authorization': idToken
-  //   }
-  // };
+  const [items, setItems] = useState(null);
+  const [page, setPage] = useState("searchBar");
 
   const onChange = e => {
-    setQuery(e.target.value)
-  }
-
-  const onClick = e => {
-    e.preventDefault();
-    console.log(query);
-
+    setQuery(e.target.value);
     Auth.currentAuthenticatedUser({
       bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
     }).then(user => {
-      console.log("setting user");
       setUser(user);
     })
-    .catch(err => console.log(err));
-    console.log(user);
+      .catch(err => console.log(err));
+  }
+
+  const onClick = async (e) => {
+    e.preventDefault();
+    console.log(query);
 
     if (user) {
       const idToken = user["signInUserSession"]["idToken"]["jwtToken"];
-      console.log(idToken);
       const config = {
-        headers:{
-            "Content-Type": 'application/json',
-            "Authorization": idToken
+        headers: {
+          "Content-Type": 'application/json',
+          "Authorization": idToken
         },
-        params:{
+        params: {
           'itemName': query,
         }
       };
+
       const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/search';
-      axios.get(url, config)
-      .then(res => console.log(res))
-      .catch((error) => {
-        console.log(error);
-      });
+      await axios.get(url, config)
+        .then(res => {
+          setItems(res.data);
+          setPage("searchResult");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
     }
+
   };
 
   return (
     <>
-      <SearchBar onChange={onChange} onClick={onClick} />
+      {page === "searchBar" &&
+        <div className="searchBarContainer">
+          <SearchBar onChange={onChange} onClick={onClick} />
+        </div>
+      }
+      {items && page === "searchResult" &&
+        <div className="searchResultContainer">
+          <SearchBar onChange={onChange} onClick={onClick} />
+          <SearchResult itemList={items} />
+        </div>}
     </>
   )
 }
