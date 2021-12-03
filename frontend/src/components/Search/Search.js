@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import Button from '@mui/material/Button';
+import Cart from '../Cart/Cart';
 import SearchBar from './SearchBar'
 import SearchResult from './SearchResult'
 import { Auth } from 'aws-amplify';
@@ -7,61 +9,120 @@ import axios from 'axios';
 function Search() {
 
   const [query, setQuery] = useState("");
-  const [user, setUser] = useState(null);
+  const [idToken, setIdToken] = useState("");
+  const [email, setEmail] = useState("");
   const [items, setItems] = useState(null);
   const [page, setPage] = useState("searchBar");
+  const [cartItems, setCartItems] = useState(null);
 
   const onChange = e => {
     setQuery(e.target.value);
-    Auth.currentAuthenticatedUser({
-      bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-    }).then(user => {
-      setUser(user);
-    })
-      .catch(err => console.log(err));
+  }
+
+  const updateSearch = async (idToken) => {
+    const config = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": idToken
+      },
+      params: {
+        'itemName': query,
+      }
+    };
+
+    const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/search';
+    await axios.get(url, config)
+      .then(res => {
+        setItems(res.data);
+        setPage("searchResult");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   const onClick = async (e) => {
     e.preventDefault();
     console.log(query);
 
-    if (user) {
-      const idToken = user["signInUserSession"]["idToken"]["jwtToken"];
-      const config = {
-        headers: {
-          "Content-Type": 'application/json',
-          "Authorization": idToken
-        },
-        params: {
-          'itemName': query,
-        }
-      };
+    if (!idToken) {
+      await Auth.currentAuthenticatedUser({
+        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+      }).then(user => {
+        const user_email = user["attributes"]["email"];
+        const user_idToken = user["signInUserSession"]["idToken"]["jwtToken"];
+        setIdToken(user_idToken);
+        setEmail(user_email);
+        updateSearch(user_idToken);
+      })
+        .catch(err => console.log(err));
 
-      const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/search';
-      await axios.get(url, config)
-        .then(res => {
-          setItems(res.data);
-          setPage("searchResult");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    } else {
+      updateSearch(idToken);
+    }
+  };
 
+  const updateCart = async (userEmail, userIdToken) => {
+    const config = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": userIdToken
+      },
+      params: {
+        'userID': userEmail
+      }
+    };
+
+    const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/getCart';
+    await axios.get(url, config)
+      .then(res => {
+        console.log(res.data);
+        setCartItems(res.data);
+        setPage("cart");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  const cartButtonClick = async (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      await Auth.currentAuthenticatedUser({
+        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+      }).then(user => {
+        const user_email = user["attributes"]["email"];
+        const user_idToken = user["signInUserSession"]["idToken"]["jwtToken"];
+        setIdToken(user_idToken);
+        setEmail(user_email);
+        updateCart(user_email, user_idToken);
+      })
+        .catch(err => console.log(err));
+
+    } else {
+      updateCart(email, idToken)
     }
 
   };
 
   return (
     <>
+      <Button variant="contained" type="submit" onClick={cartButtonClick}>Cart</Button>
+      {cartItems && page === "cart" &&
+        <div className="searchResultContainer">
+          <Cart cartItems={cartItems} />
+        </div>
+      }
       {page === "searchBar" &&
         <div className="searchBarContainer">
           <SearchBar onChange={onChange} onClick={onClick} />
         </div>
       }
-      {items && page === "searchResult" &&
+      {email && idToken && items && page === "searchResult" &&
         <div className="searchResultContainer">
           <SearchBar onChange={onChange} onClick={onClick} />
-          <SearchResult itemList={items} />
+          <SearchResult idToken={idToken} email={email} itemList={items} />
         </div>}
     </>
   )

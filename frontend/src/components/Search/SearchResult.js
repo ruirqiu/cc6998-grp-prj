@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -8,36 +9,37 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import './Search.css'
 
-function SearchResult({ itemList }) {
+function SearchResult({ email, idToken, itemList }) {
 
-  // const onClick = async (e) => {
-  //   e.preventDefault();
-  //   console.log(query);
+  const onClick = async (item) => {
+    console.log(email);
+    console.log(idToken);
 
-  //   if (user) {
-  //     const idToken = user["signInUserSession"]["idToken"]["jwtToken"];
-  //     const config = {
-  //       headers: {
-  //         "Content-Type": 'application/json',
-  //         "Authorization": idToken
-  //       },
-  //       params: {
-  //         'itemName': query,
-  //       }
-  //     };
+    // NOT SURE HOW TO POST WITH AXIOS, NEEDS FIX!!!!
+    const config = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Content-Type": 'application/json',
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "*",
+        "Authorization": idToken
+      },
+      params: {
+        'user_id': email,
+        'tcin': item.id
+      }
+    };
 
-  //     const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/search';
-  //     await axios.get(url, config)
-  //       .then(res => {
-  //         setItems(res.data);
-  //         setPage("searchResult");
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //       });
-
-  //   }
-  // };
+    const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/addToCart';
+    await axios.post(url, config)
+      .then(res => {
+        console.log(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <Box className='searchResult'>
@@ -50,7 +52,7 @@ function SearchResult({ itemList }) {
                   <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                     <ListItemText style={{ marginRight: '50px' }} primary={d.title} />
                     <ListItemText primary={d.price} />
-                    <Button variant="contained">Add to Cart</Button>
+                    <Button type="submit" variant="contained" onClick={() => onClick(d)}>Add to Cart</Button>
                   </ListItemButton>
                   <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
                 </ListItem>
