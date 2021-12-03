@@ -62,7 +62,7 @@ def get_items(tcin, dynamodb=None):
 
 
 def lambda_handler(event, context):
-    query_string = event["params"]["querystring"]["itemName"]
+    query_string = event["queryStringParameters"]["itemName"]
     print("===============query string=========")
     print(query_string)
     
