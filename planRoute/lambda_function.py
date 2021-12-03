@@ -8,8 +8,8 @@ from boto3.dynamodb.conditions import Attr
 from decimal import Decimal
 import heapq
 from math import sin, cos, sqrt, atan2, radians
-
-
+import datetime 
+import dateutil.tz
 
 
 # approximate radius of earth in km
@@ -69,6 +69,25 @@ def get_cart(user_id, dynamodb=None):
         else:
             return {}
 
+def insert_history(user_id, total_price_dollar, total_duration_min, total_distance_mile, route_string, dynamodb=None):
+    now = datetime.datetime.now(tz=dateutil.tz.gettz('US/Eastern'))
+    timestamp = now.strftime('%Y-%m-%dT%H:%M:%S-%Z')
+    if not dynamodb:
+        dynamodb = boto3.resource('dynamodb')
+
+    table = dynamodb.Table('history')
+    response = table.put_item(
+       Item={
+            'user_id': user_id,
+            'time_stamp': timestamp,
+            'total_price_dollar': total_price_dollar,
+            'total_duration_min': total_duration_min,
+            'total_distance_mile': total_distance_mile,
+            'route': route_string
+        }
+    )
+    return response
+
 def get_item(tcin, dynamodb=None):
     if not dynamodb:
         dynamodb = boto3.resource('dynamodb')
@@ -107,6 +126,28 @@ def get_stores(lat, lon, dynamodb=None):
         
     except ClientError as e:
         print(e.response['Error']['Message'])
+        
+def clear_cart(user_id, dynamodb=None):
+    if not dynamodb:
+        dynamodb = boto3.resource('dynamodb')
+
+    table = dynamodb.Table('shopping_cart')
+
+    try:
+        response = table.delete_item(
+            Key={
+                'user_id': user_id
+            }
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] == "ConditionalCheckFailedException":
+            print(e.response['Error']['Message'])
+        else:
+            raise
+    else:
+        return response
+
+
         
 def get_closest(lat, lon, store_list):
     store_short_list = []
@@ -246,7 +287,7 @@ def find_cheapest(item_details, short_list):
         index  = 0
         for price, brand_name in price_chart:
             if len(store_by_brand[brand_name]) != 0:
-                # purcahse this item at this store
+                # purchase this item at this store
                 distance, lat2, lon2, brand_id, brand_name, id, name = store_by_brand[brand_name][0]
                 if id not in duplicate_check:
                     # this item can not be purchased with previous items at the same location
@@ -320,7 +361,7 @@ def find_shortest(item_details, short_list):
         for item_id, item_price in item_price_map.items():
             #print("!!!!!!", item_id,duplicate_check)
             if item_id in duplicate_check:
-                # not yet purcahsed:
+                # not yet purchased:
                 # purchase here
                 total_price += item_price
                 purchase_here.append((item_id ,item_price))
@@ -373,8 +414,8 @@ def lambda_handler(event, context):
     # get list of items
     cart = get_cart_details(user_id)
     print("==========cart==========")
-    print(cart)
-    if 'item_details' not in cart:
+    print(cart) 
+    if 'item_details' not in cart or len(cart['item_details'])==0:
         # not buying anything
         return {
             'statusCode': 201,
@@ -398,6 +439,23 @@ def lambda_handler(event, context):
         route, total_price = find_cheapest(cart['item_details'], short_list)
     else:
         route, total_price = find_shortest(cart['item_details'], short_list)
+    
+    # process results to form a list of lat lons
+    geo_list = [(lat, lon)]
+    route_dict = []
+    for point in route:
+        distance, store_lat, store_lon, brand_id, brand_name, id, name, purchase_here = point
+        purchased_here_dict_list = []
+        for merchandise, merchandise_price in purchase_here:
+            purchased_here_dict_list.append({"item_id":merchandise, "price": float(merchandise_price)})
+        
+        route_dict.append({"brand_name":brand_name, "brand_id":brand_id, "store_id":id, "store_name":name, 
+        "lat": float(store_lat), "lon":float(store_lon), "purchased_here": purchased_here_dict_list })
+        
+        geo_list.append((store_lat,store_lon))
+        
+    print("=================lat lon list==============")
+    print(geo_list)
     
     
     # plot such route
@@ -423,7 +481,27 @@ def lambda_handler(event, context):
     total_price_dollar = "$"+ str(total_price) 
     
     print("===================route======================")
-    print(result)
+    #print(result)
     print(total_price_dollar, total_duration_min, total_distance_mile)
     
-    return total_price_dollar, total_duration_min, total_distance_mile, result
+    # clear cart
+    response = clear_cart(user_id)
+    print(response)
+    
+    # put history
+    route_string = json.dumps(route_dict)
+    response = insert_history(user_id, total_price_dollar, total_duration_min, total_distance_mile, route_string)
+    print(response)
+    
+    return_results = {
+        'statusCode': 200,
+        'body': {
+            "total_price_dollar": total_price_dollar,
+            "total_duration_min": total_duration_min,
+            "total_distance_mile": total_distance_mile,
+            "geo_list": geo_list,
+            "route_details": route_dict
+        }
+    }
+    
+    return return_results
