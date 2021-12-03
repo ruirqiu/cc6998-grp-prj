@@ -40,7 +40,7 @@ def get_item(tcin, dynamodb=None):
 def lambda_handler(event, context):
     print("==========Input==========")
     print(event)
-    userId = event["params"]["querystring"]["userID"]
+    userId = event["queryStringParameters"]["userID"]
 
     cart = get_cart(userId)
     print("==========cart==========")
