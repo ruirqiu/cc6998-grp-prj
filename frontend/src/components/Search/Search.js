@@ -1,32 +1,62 @@
 import React, { useState } from 'react'
 import SearchBar from './SearchBar'
 import { Auth } from 'aws-amplify';
+import axios from 'axios';
 
 function Search () {
 
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState("");
+  const [user, setUser] = useState(null);
+  // const idToken = user["signInUserSession"]["accessToken"]["jwtToken"];
+  // const additionalParams = {
+  //   //If there are any unmodeled query parameters or headers that need to be sent with the request you can add them here
+  //   'headers': {
+  //       'Authorization': idToken
+  //   }
+  // };
 
   const onChange = e => {
     setQuery(e.target.value)
   }
 
   const onClick = e => {
+    e.preventDefault();
+    console.log(query);
 
-    // NOTE: JUST FOR TESTING, SHOULD REMOVE LATER
     Auth.currentAuthenticatedUser({
       bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-    }).then(user => console.log(user))
+    }).then(user => {
+      console.log("setting user");
+      setUser(user);
+    })
     .catch(err => console.log(err));
+    console.log(user);
 
-    e.preventDefault()
-    console.log(query)
-  }
+    if (user) {
+      const idToken = user["signInUserSession"]["idToken"]["jwtToken"];
+      console.log(idToken);
+      const config = {
+        headers:{
+            "Content-Type": 'application/json',
+            "Authorization": idToken
+        },
+        params:{
+          'itemName': query,
+        }
+      };
+      const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/search';
+      axios.get(url, config)
+      .then(res => console.log(res))
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+  };
 
   return (
     <>
       <SearchBar onChange={onChange} onClick={onClick} />
     </>
-
   )
 }
 
