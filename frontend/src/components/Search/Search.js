@@ -7,30 +7,20 @@ function Search () {
 
   const [query, setQuery] = useState("");
   const [user, setUser] = useState(null);
-  // const idToken = user["signInUserSession"]["accessToken"]["jwtToken"];
-  // const additionalParams = {
-  //   //If there are any unmodeled query parameters or headers that need to be sent with the request you can add them here
-  //   'headers': {
-  //       'Authorization': idToken
-  //   }
-  // };
 
   const onChange = e => {
-    setQuery(e.target.value)
+    setQuery(e.target.value);
+    Auth.currentAuthenticatedUser({
+      bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+    }).then(user => {
+      setUser(user);
+    })
+    .catch(err => console.log(err));
   }
 
   const onClick = e => {
     e.preventDefault();
     console.log(query);
-
-    Auth.currentAuthenticatedUser({
-      bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-    }).then(user => {
-      console.log("setting user");
-      setUser(user);
-    })
-    .catch(err => console.log(err));
-    console.log(user);
 
     if (user) {
       const idToken = user["signInUserSession"]["idToken"]["jwtToken"];
