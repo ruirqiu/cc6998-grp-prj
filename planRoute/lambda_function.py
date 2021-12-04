@@ -70,7 +70,7 @@ def get_cart(user_id, dynamodb=None):
         else:
             return {}
 
-def insert_history(user_id, total_price_dollar, total_duration_min, total_distance_mile, route_string, dynamodb=None):
+def insert_history(user_id, total_price_dollar, total_duration_min, total_distance_mile, route_string, instruction_list, dynamodb=None):
     now = datetime.datetime.now(tz=dateutil.tz.gettz('US/Eastern'))
     timestamp = now.strftime('%Y-%m-%dT%H:%M:%S-%Z')
     if not dynamodb:
@@ -84,7 +84,8 @@ def insert_history(user_id, total_price_dollar, total_duration_min, total_distan
             'total_price_dollar': total_price_dollar,
             'total_duration_min': total_duration_min,
             'total_distance_mile': total_distance_mile,
-            'route': route_string
+            'route': route_string,
+            'instructions': instruction_list
         }
     )
     return response
@@ -299,13 +300,13 @@ def find_cheapest(item_details, short_list):
                 distance, lat2, lon2, brand_id, brand_name, id, name = store_by_brand[brand_name][0]
                 if id not in duplicate_check:
                     # this item can not be purchased with previous items at the same location
-                    route.append( (distance, lat2, lon2, brand_id, brand_name, id, name, [(tcin ,price)]))
+                    route.append( (distance, lat2, lon2, brand_id, brand_name, id, name, [(title ,price)]))
                     duplicate_check[id] = index
                     index += 1
                 else:
                     # this item should be purchased with earlier items at the same location
                     index_ = duplicate_check[id]
-                    route[index_][7].append((tcin, price))
+                    route[index_][7].append((title, price))
                 total_price += price
                 break
             
@@ -361,7 +362,7 @@ def find_shortest(item_details, short_list):
         for key, val in price_map_.items():
             price_map[key][tcin] = val
         
-        duplicate_check[tcin] = 1
+        duplicate_check[tcin] = title
         
     # go to the nearest store first, buy all available items
     # then go to cloestest store next to current location
@@ -379,7 +380,7 @@ def find_shortest(item_details, short_list):
                 # not yet purchased:
                 # purchase here
                 total_price += item_price
-                purchase_here.append((item_id ,item_price))
+                purchase_here.append((duplicate_check[item_id] ,item_price))
                 del duplicate_check[item_id]
         if len(purchase_here) != 0:
             route.append( (distance, lat2, lon2, brand_id, brand_name, id, name, purchase_here))
@@ -416,7 +417,7 @@ def google_map_route(lat1,lat2,lon1,lon2):
     # When no results can be found
     # {'available_travel_modes': ['DRIVING', 'WALKING', 'BICYCLING'], 'geocoded_waypoints': [{}, {}], 'routes': [], 'status': 'ZERO_RESULTS'}
     
-    if len(dirs['routes']) == 0:
+    if len(dirs['routes']) == 0 or len(dirs['routes'][0]['legs']) == 0:
         print("!!!!!!!! Retry with driving !!!!!!")
         # retry with driving
         url_d = "https://maps.googleapis.com/maps/api/directions/json?origin="+str(lat1)+"%2C"+str(lon1)+"&destination="+str(lat2)+"%2C"+str(lon2)+"&key=AIzaSyBegMW_bP41xNKWlLy9Op-3U9kDHA8ABJQ"
@@ -434,18 +435,29 @@ def google_map_route(lat1,lat2,lon1,lon2):
         dirs = json.loads(response.data)
         
         # if driving still doesn't work
-        if len(dirs['routes']) == 0:
+        if len(dirs['routes']) == 0 or len(dirs['routes'][0]['legs']) == 0:
             print("!!!!!!!!! Can't find route by driving  !!!!!!!!")
-            return  {}, {}, {}
+            return  {}, {}, {},"","","",[],[]
     
     
-    
-    
+    print("HIIIII ")
+    print(dirs)
     distance = dirs['routes'][0]['legs'][0]['distance']
     duration = dirs['routes'][0]['legs'][0]['duration']
-    print(distance['text'], duration['text'])
+    start_address = dirs['routes'][0]['legs'][0]['start_address']
+    end_address = dirs['routes'][0]['legs'][0]['end_address']
+    instruction = dirs['routes'][0]['legs'][0]['steps'][0]['html_instructions']
     
-    return dirs, distance, duration 
+    sub_instructions, sub_durations = [],[]
+    for step in dirs['routes'][0]['legs'][0]['steps']:
+        sub_instructions.append(step['html_instructions'])
+        sub_durations.append(step['duration']['text'])
+    
+    print("################google map function #####")
+    print(distance['text'], duration['text'], start_address,end_address, instruction, sub_instructions, sub_durations)
+    
+    
+    return dirs, distance, duration, start_address,end_address, instruction, sub_instructions, sub_durations
     
 
 def lambda_handler(event, context):
@@ -508,33 +520,60 @@ def lambda_handler(event, context):
     t1,n1 = lat, lon
     for point in route:
         distance, t2, n2, brand_id, brand_name, id, name, purchase_here = point
-        dirs, distance, duration = google_map_route(t1,t2,n1,n2)
+        dirs, distance, duration, start_address,end_address, instruction, sub_instructions, sub_durations = google_map_route(t1,t2,n1,n2)
         if not dirs:
-            t1,n1 = t2,n2
-            continue
-        result.append(dirs)
+            return {
+                'statusCode': 201,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    "Access-Control-Allow-Headers": "*",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                }, 
+                'body': json.dumps({})
+            }
+                    
+        direction = {
+            'distance':distance['text'],
+            'duration':duration['text'],
+            'start_address': start_address,
+            'end_address': end_address,
+            'instruction':instruction,
+            'sub_instructions':sub_instructions,
+            'sub_durations':sub_durations,
+        }
+        result.append(direction)
         total_duration += float(duration['value'])
         total_distance += float(distance['value'])
         t1,n1 = t2,n2
     t2,n2 = lat,lon
-    dirs, distance, duration = google_map_route(t1,t2,n1,n2)
+    dirs, distance, duration, start_address,end_address, instruction, sub_instructions, sub_durations = google_map_route(t1,t2,n1,n2)
     total_duration += float(duration['value'])
     total_distance += float(distance['value'])
-    result.append(dirs)
+    direction = {
+        'distance':distance['text'],
+        'duration':duration['text'],
+        'start_address': start_address,
+        'end_address': end_address,
+        'instruction':instruction,
+        'sub_instructions':sub_instructions,
+        'sub_durations':sub_durations,
+    }
+    result.append(direction)
     
     # convert to east to read units
     total_duration_min = str(int(total_duration/60))+ " min"
-    total_distance_mile = str(int(total_distance/1000)) + " km"
-    total_price_dollar = "$"+ str(total_price) 
+    total_distance_mile = str(int(total_distance/1000)) + " km" 
+    total_price_dollar = "$"+ str("{:.2f}".format(total_price)) 
     
     print("===================route======================")
-    #print(result)
+    #print(result) 
     print(total_price_dollar, total_duration_min, total_distance_mile)
 
     
     # put history
     route_string = json.dumps(route_dict)
-    response = insert_history(user_id, total_price_dollar, total_duration_min, total_distance_mile, route_string)
+    response = insert_history(user_id, total_price_dollar, total_duration_min, total_distance_mile, route_string, result)
     print(response)
     
     return_results = {
@@ -550,7 +589,8 @@ def lambda_handler(event, context):
             "total_duration_min": total_duration_min,
             "total_distance_mile": total_distance_mile,
             "geo_list": geo_list, 
-            "route_details": route_dict
+            "route_details": route_dict,
+            "html_instruction_data": result
         })
     }
     
