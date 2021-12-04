@@ -39,6 +39,28 @@ function Cart({ email, idToken, cartItems }) {
     }
 
   const updateRoute = async (userEmail, userIdToken) => {
+      
+      if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        pos['lat'] = position.coords.latitude
+        pos['lng'] = position.coords.longitude
+        
+      }, () => {
+        // Browser supports geolocation, but user has denied permission
+        console.log("Browser supports geolocation, but user has denied permission")
+      });
+    } else {
+      // Browser doesn't support geolocation
+      console.log("Browser doesn't support geolocation")
+
+    }
+      
+    var option_text = 'SHORT'
+    if (routeSwitch) {
+        option_text= 'CHEAP'
+    }
+      
+    console.log(option_text)
    
     const config = {
       headers: {
@@ -49,9 +71,10 @@ function Cart({ email, idToken, cartItems }) {
         'user_id': email,
         'lat': pos['lat'],
         'lon': pos['lng'],
-        'route_option': 'CHEAP'
+        'route_option': option_text
       }
     };
+    console.log("before request")
     console.log(pos)
 
     const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/planRoute';
@@ -81,15 +104,7 @@ function Cart({ email, idToken, cartItems }) {
 
   return (
     <>
-      <Stack style={{ justifyContent: 'center' }} direction="row" spacing={1} alignItems="center">
-        <Typography>Shortest Route</Typography>
-        <Switch
-          checked={routeSwitch}
-          onChange={handleSwitchChange}
-          inputProps={{ 'aria-label': 'controlled' }}
-        />
-        <Typography>Cheapest Route</Typography>
-      </Stack>
+      
       <div>{summary_text}</div>
       <Box className='cartResult'>
         <nav aria-label="secondary mailbox folders">
@@ -111,6 +126,15 @@ function Cart({ email, idToken, cartItems }) {
           </List>
         </nav>
       </Box>
+      <Stack style={{ justifyContent: 'center' }} direction="row" spacing={1} alignItems="center">
+        <Typography>Shortest Route</Typography>
+        <Switch
+          checked={routeSwitch}
+          onChange={handleSwitchChange}
+          inputProps={{ 'aria-label': 'controlled' }}
+        />
+        <Typography>Cheapest Route</Typography>
+      </Stack>
       <Button variant="contained" type="submit" onClick={routeButtonClick}>Plan Route</Button>
 
       {routeItems && page === "Route" &&
