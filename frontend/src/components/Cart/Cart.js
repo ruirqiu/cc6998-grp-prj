@@ -14,8 +14,29 @@ function Cart({ email, idToken, cartItems }) {
     
     const [routeItems, setRouteItems] = useState(null);
     const [page, setPage] = useState(null);
+    let pos = {
+                lat: 40.77,
+                lng: -73.98
+            };
     
     const updateRoute = async (userEmail, userIdToken) => {
+     if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            console.log(pos)
+        }, () => {
+            // Browser supports geolocation, but user has denied permission
+            console.log("Browser supports geolocation, but user has denied permission")
+        });
+    } else {
+        // Browser doesn't support geolocation
+        console.log("Browser doesn't support geolocation")
+        
+    }
+        
      const config = {
       headers: {
         "Content-Type": 'application/json',
@@ -23,8 +44,8 @@ function Cart({ email, idToken, cartItems }) {
       },
       params: {
         'user_id': email,
-        'lat':40.77,
-        'lon':-73.98,
+        'lat':pos.lat,
+        'lon':pos.lng,
         'route_option':'CHEAP'
       }
     };

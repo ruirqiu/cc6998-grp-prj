@@ -9,17 +9,18 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import './Route.css'
 import GoogleMapReact from 'google-map-react';
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 function Route({ routeItems }) {
   var summary_text = "Total Price: "+routeItems.total_price_dollar+"    | Total Distance: "+routeItems.total_distance_mile + "     | Total Travel Time: "+ routeItems.total_duration_min
 
-  var map_url = "<iframe width='800' height='600' frameborder='0' style='border:0' src = 'https://www.google.com/maps/embed/v1/directions?key=AIzaSyD1UW22TBdaFcgSdVY70_cyYA_OXIQ-sFo&origin=40.777523,-73.987952&destination=40.777523,-73.987952&waypoints=40.758052,-73.985552|40.729552,-73.996552&mode=walking' allowfullscreen></iframe>"
-  const handleApiLoaded = (map, maps) => {
-      
-  // use map and maps objects
-};
+  const render = (status: Status) => {
+      return <h1>{status}</h1>;
+    };
+
+
     
     
   return (
@@ -58,22 +59,6 @@ function Route({ routeItems }) {
           </List>
        </nav>
     </Box>
-
-    <div style={{ height: '100vh', width: '100%' }}>
-        <GoogleMapReact
-          bootstrapURLKeys={{ key:"AIzaSyD-osKueFGsLcxLXohmn8YR9UaujpvZn1g" }}
-          defaultCenter={[40.777523,-73.987952]}
-          defaultZoom={10}
-          yesIWantToUseGoogleMapApiInternals
-          onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
-        >
-          <AnyReactComponent
-            lat={40.777523}
-            lng={-73.987952}
-            text="My Marker"
-          />
-        </GoogleMapReact>
-    </div>
     </>
   );
 }
