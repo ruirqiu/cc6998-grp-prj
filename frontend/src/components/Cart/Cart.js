@@ -20,18 +20,14 @@ function Cart({ email, idToken, cartItems }) {
   const [routeSwitch, setRouteSwitch] = useState(true);
 
   let pos = {
-    lat: 40.77,
-    lng: -73.98
+    'lat': 40,
+    'lng': -73
   };
-
-  const updateRoute = async (userEmail, userIdToken) => {
-    if (navigator.geolocation) {
+  if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
-        pos = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        console.log(pos)
+        pos['lat'] = position.coords.latitude
+        pos['lng'] = position.coords.longitude
+        
       }, () => {
         // Browser supports geolocation, but user has denied permission
         console.log("Browser supports geolocation, but user has denied permission")
@@ -42,6 +38,8 @@ function Cart({ email, idToken, cartItems }) {
 
     }
 
+  const updateRoute = async (userEmail, userIdToken) => {
+   
     const config = {
       headers: {
         "Content-Type": 'application/json',
@@ -49,11 +47,12 @@ function Cart({ email, idToken, cartItems }) {
       },
       params: {
         'user_id': email,
-        'lat': pos.lat,
-        'lon': pos.lng,
+        'lat': pos['lat'],
+        'lon': pos['lng'],
         'route_option': 'CHEAP'
       }
     };
+    console.log(pos)
 
     const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/planRoute';
     await axios.get(url, config)
