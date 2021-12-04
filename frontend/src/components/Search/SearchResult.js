@@ -12,7 +12,24 @@ import { styled } from '@mui/material/styles';
 import './Search.css'
 
 function SearchResult({ email, idToken, itemList }) {
+    // add descriptions to items without description
+    for (let i = 0; i < itemList.length; i++) {
+        if (!itemList[i].hasOwnProperty('description')){
+            itemList[i]['description'] = ["No descriptions"]
+        }
+        if (!itemList[i].hasOwnProperty('title')){
+            itemList[i]['title'] = "No titles"
+        }
+        if (!itemList[i].hasOwnProperty('price')){
+            itemList[i]['price'] = "No price"
+        }
+        if (!itemList[i].hasOwnProperty('price_range')){
+            itemList[i]['price_range'] = "No price range"
+        }
 
+    }
+    console.log(itemList)
+    
 
 
   const onClick = async (item) => {

@@ -36,6 +36,7 @@ function Search() {
     await axios.get(url, config)
       .then(res => {
         setItems(res.data);
+        console.log(res.data)
         setPage("searchResult");
       })
       .catch((error) => {
