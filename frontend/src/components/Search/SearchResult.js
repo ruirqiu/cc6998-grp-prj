@@ -7,9 +7,13 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
 import './Search.css'
 
 function SearchResult({ email, idToken, itemList }) {
+
+
 
   const onClick = async (item) => {
     console.log(email);
@@ -38,6 +42,14 @@ function SearchResult({ email, idToken, itemList }) {
       });
   };
 
+  const CartButton = styled(Button)(() => ({
+    color: 'white',
+    backgroundColor: '#F39C12',
+    '&:hover': {
+      backgroundColor: '#D68910',
+    },
+  }));
+
   return (
     <Box className='searchResult'>
       <nav aria-label="secondary mailbox folders">
@@ -45,13 +57,24 @@ function SearchResult({ email, idToken, itemList }) {
           {itemList.map(function (d, idx) {
             return (
               <React.Fragment key={`listitem-${idx}`}>
-                <ListItem disablePadding>
-                  <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <ListItemText style={{ marginRight: '50px' }} primary={d.title} />
-                    <ListItemText primary={d.price} />
-                    <Button type="submit" variant="contained" onClick={() => onClick(d)}>Add to Cart</Button>
+                <ListItem style={{ display: 'flex', alignItems: 'flex-start' }} disablePadding>
+                  <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', backgroundColor: 'transparent' }}>
+                    <ListItemText style={{ marginRight: '50px' }} disableTypography
+                      primary={<Typography style={{ fontWeight: 'bold' }}>{d.title}</Typography>} />
+                    <ListItemText primary={`Price range: ${d.price_range}`} />
+                    <div style={{ marginTop: '5px', marginBottom: '10px' }}>
+                      {d.description
+                        .map(dest => <span style={{ color: '#2471A3', lineHeight: '16pt' }}>{dest}</span>)
+                        .reduce((prev, curr) => [prev, '. ', curr])
+                      }
+                    </div>
                   </ListItemButton>
-                  <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
+                  <div className="searchItemButtonContainer">
+                    <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
+                    <CartButton className="searchItemButton" type="submit" variant="contained" onClick={() => onClick(d)}>
+                      Add to Cart
+                    </CartButton>
+                  </div>
                 </ListItem>
                 <Divider />
               </React.Fragment>
@@ -59,7 +82,7 @@ function SearchResult({ email, idToken, itemList }) {
           })}
         </List>
       </nav>
-    </Box>
+    </Box >
   );
 }
 
