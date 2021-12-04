@@ -48,9 +48,10 @@ function Cart({ email, idToken, cartItems }) {
         
   };
     
-    
+    var summary_text = "Last Update: "+cartItems.cart_update_time
   return (
     <>
+    <div>{summary_text}</div>  
     <Box className='cartResult'>
        <nav aria-label="secondary mailbox folders">
           <List>
@@ -60,7 +61,7 @@ function Cart({ email, idToken, cartItems }) {
                 <ListItem disablePadding>
                    <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                    <ListItemText style={{ marginRight: '50px' }} primary={d.title} />
-                   <ListItemText primary={d.price} />
+                   <ListItemText primary={d.price_range} />
                    </ListItemButton>
                    <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
                 </ListItem>
