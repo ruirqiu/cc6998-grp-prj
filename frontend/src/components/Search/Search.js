@@ -85,6 +85,49 @@ function Search() {
         console.log(error);
       });
   }
+  
+  const clearCart = async (userEmail, userIdToken) => {
+    const config = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": userIdToken
+      },
+      params: {
+        'userId': userEmail
+      }
+    };
+
+    const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/startNewSearch';
+    await axios.get(url, config)
+      .then(res => {
+        console.log(res.data);
+        setPage("searchBar");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  
+  const newCartButtonClick = async (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      await Auth.currentAuthenticatedUser({
+        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+      }).then(user => {
+        const user_email = user["attributes"]["email"];
+        const user_idToken = user["signInUserSession"]["idToken"]["jwtToken"];
+        setIdToken(user_idToken);
+        setEmail(user_email);
+        clearCart(user_email, user_idToken);
+      })
+        .catch(err => console.log(err));
+
+    } else {
+      clearCart(email, idToken);
+    }
+
+  }
 
   const cartButtonClick = async (e) => {
     e.preventDefault();
@@ -110,8 +153,10 @@ function Search() {
   return (
     <>
       <Button variant="contained" type="submit" onClick={cartButtonClick}>Cart</Button>
+      <Button variant="contained" type="submit" onClick={newCartButtonClick}>Start New Cart</Button>
       {cartItems && page === "cart" &&
         <div className="searchResultContainer">
+          <SearchBar onChange={onChange} onClick={onClick} />
           <Cart cartItems={cartItems} />
         </div>
       }

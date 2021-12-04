@@ -16,6 +16,7 @@ function SearchResult({ email, idToken, itemList }) {
     console.log(idToken);
 
     // NOT SURE HOW TO POST WITH AXIOS, NEEDS FIX!!!!
+    // Dec. 3rd Claire Luo: Fixed. remove headers, change method to get, add headers in lambda
     const config = {
       headers: {
         "Content-Type": 'application/json',
