@@ -19,7 +19,7 @@ function Search() {
     setQuery(e.target.value);
   }
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   const updateSearch = async (idToken) => {
     const config = {
       headers: {
@@ -85,7 +85,7 @@ function Search() {
         console.log(error);
       });
   }
-  
+
   const clearCart = async (userEmail, userIdToken) => {
     const config = {
       headers: {
@@ -107,7 +107,7 @@ function Search() {
         console.log(error);
       });
   }
-  
+
   const newCartButtonClick = async (e) => {
     e.preventDefault();
 
