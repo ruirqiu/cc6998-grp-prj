@@ -64,7 +64,9 @@ function SearchResult({ email, idToken, itemList }) {
                     <ListItemText primary={`Price range: ${d.price_range}`} />
                     <div style={{ marginTop: '5px', marginBottom: '10px' }}>
                       {d.description
-                        .map(dest => <span style={{ color: '#2471A3', lineHeight: '16pt' }}>{dest}</span>)
+                        .map(function (dest, di) {
+                          return (<span key={di} style={{ color: '#2471A3', lineHeight: '16pt' }}>{dest}</span>)
+                        })
                         .reduce((prev, curr) => [prev, '. ', curr])
                       }
                     </div>

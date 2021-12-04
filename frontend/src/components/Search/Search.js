@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Button from '@mui/material/Button';
 import Cart from '../Cart/Cart';
+import History from '../History/History';
 import SearchBar from './SearchBar'
 import SearchResult from './SearchResult'
 import { Auth } from 'aws-amplify';
@@ -150,10 +151,52 @@ function Search() {
 
   };
 
+  const historyButtonClick = async (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      await Auth.currentAuthenticatedUser({
+        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+      }).then(user => {
+        const user_email = user["attributes"]["email"];
+        const user_idToken = user["signInUserSession"]["idToken"]["jwtToken"];
+        setIdToken(user_idToken);
+        setEmail(user_email);
+        setPage("history");
+      })
+        .catch(err => console.log(err));
+
+    } else {
+      setPage("history");
+    }
+  };
+
+  const searchButtonClick = async (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      await Auth.currentAuthenticatedUser({
+        bypassCache: false  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+      }).then(user => {
+        const user_email = user["attributes"]["email"];
+        const user_idToken = user["signInUserSession"]["idToken"]["jwtToken"];
+        setIdToken(user_idToken);
+        setEmail(user_email);
+        setPage("searchBar");
+      })
+        .catch(err => console.log(err));
+
+    } else {
+      setPage("searchBar");
+    }
+  };
+
   return (
     <>
-      <Button variant="contained" type="submit" onClick={cartButtonClick}>Cart</Button>
-      <Button variant="contained" type="submit" onClick={newCartButtonClick}>Start New Cart</Button>
+      <Button className="navButton" variant="contained" type="submit" onClick={searchButtonClick}>Search</Button>
+      <Button className="navButton" variant="contained" type="submit" onClick={cartButtonClick}>Cart</Button>
+      <Button className="navButton" variant="contained" type="submit" onClick={newCartButtonClick}>Start New Cart</Button>
+      <Button className="navButton" variant="contained" type="submit" onClick={historyButtonClick}>History</Button>
       {email && idToken && cartItems && page === "cart" &&
         <div className="searchResultContainer">
           <SearchBar onChange={onChange} onClick={onClick} />
@@ -170,6 +213,11 @@ function Search() {
           <SearchBar onChange={onChange} onClick={onClick} />
           <SearchResult idToken={idToken} email={email} itemList={items} />
         </div>}
+      {email && page === "history" &&
+        <div className="searchResultContainer">
+          <History email={email} />
+        </div>}
+
     </>
   )
 }
