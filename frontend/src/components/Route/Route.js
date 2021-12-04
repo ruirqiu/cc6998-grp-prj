@@ -8,8 +8,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import './Route.css'
-import GoogleMapReact from 'google-map-react';
-import { Wrapper, Status } from "@googlemaps/react-wrapper";
 
 
 function Route({ routeItems }) {
