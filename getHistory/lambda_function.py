@@ -20,20 +20,27 @@ def get_history(user_id, dynamodb=None):
         print(e.response['Error']['Message'])
     else:
         if 'Item' in response:
-            return response['Item']
+            return "200", response['Item']
         else:
-            return {}
+            return "201", {}
 
 def lambda_handler(event, context):
     print("==========Input==========")
     print(event)
     userId = event["queryStringParameters"]["userId"]
     
-    history = get_history(userId)
+    statusCode, history = get_history(userId)
     print("==========history==========")
     print(history)
     
+    
     return {
-        'statusCode': 200,
+        'statusCode': statusCode,
+        'headers': {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*"
+        }, 
         'body': json.dumps(history)
     }

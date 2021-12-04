@@ -28,4 +28,18 @@
 .imageContainer {
   max-width: 100px;
   max-height: 100px;
+  margin-bottom: 10px;
+}
+
+.searchItemButtonContainer {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+}
+
+.searchItemButton {
+  width: 140px;
+  height: 40px;
+  background-color: '#DC7633';
 }

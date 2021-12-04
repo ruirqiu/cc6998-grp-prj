@@ -24,11 +24,12 @@ keywords = [ 'pear', 'pen','water', 'coffee', 'ham','tea','bread',  'milk', 'cra
     'blueberry','blackberry','mango','oil','salt', 'pepper','sugar','baking sheet','tin roll','foil',
     'syrup','honey','flower','flour','paper','pan','lemon','corn', 'cucumber','potato',
     'carrot','cauliflower','broccoli', 'beans', 'mushroom','rice', 'pasta','lettuce', 'asparagus', 'onion',
-    'cabbage','dressing','egg','butter','cheese','juice']
+    'cabbage','dressing','egg','butter','cheese','juice', 'bear', 'beer', 'wine', 'shirt',
+    'raspberry', 'strawberry', 'screwdriver', 'wrench', 'soap', 'soup', 'towel', 'pistol', 'bag', 'fork']
           
 # TODO hardcoded now
-STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords, 'Whole Foods':keywords[20:],
-        'Trader Joes':keywords[:15],'Wegmans Store':keywords[13:30], 'Wine Store':['water','tea','coffee','syrup','honey','lemon','juice'] }
+STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords[:45], 'Whole Foods':keywords[20:40],
+        'Trader Joes':keywords[:15],'Wegmans Store':keywords[13:30], 'Wine Store':['water','tea','coffee','syrup','honey','lemon','juice','beer','wine'] }
 
 # Walmart lowest for first 40, same last 6
 # Wegman highest for all
@@ -201,7 +202,8 @@ def compare_price(lowest, highest, price, keyword):
         heapq.heappush(price_list, (highest,'Wegmans Store'))
     
     # Target correct price
-    heapq.heappush(price_list, (price,'Target'))
+    if keyword in STORE_KEYWORD_MAPPING['Target']:
+        heapq.heappush(price_list, (price,'Target'))
     
     # Whole Foods + 0.9
     if keyword in STORE_KEYWORD_MAPPING['Whole Foods']:
@@ -234,7 +236,8 @@ def find_price(lowest, highest, price, keyword):
         price_list['Wegmans Store']=highest
     
     # Target correct price
-    price_list['Target']=price
+    if keyword in STORE_KEYWORD_MAPPING['Target']:
+        price_list['Target']=price
     
     # Whole Foods + 0.9
     if keyword in STORE_KEYWORD_MAPPING['Whole Foods']:
@@ -260,7 +263,12 @@ def find_cheapest(item_details, short_list):
     duplicate_check = {}
     
     for item in item_details:
-        price_range, price_s, title, tcin, keyword = item['price_range'], item['price'], item['title'], item['id'], item['keyword']
+        if not item :
+            continue 
+        price_range , price_s, title, tcin, keyword = "", item['price'], item['title'], item['id'], item['keyword']
+        if 'price_range' in item:
+            price_range = item['price_range']
+            
         if " - " in price_range:
             lowest_s, highest_s = price_range.split(" - ")
         elif "-" in price_range:
@@ -328,8 +336,15 @@ def find_shortest(item_details, short_list):
     # process items to keep track of which are not visited yet 
     duplicate_check = {}
     for item in item_details:
+        if not item :
+            continue 
         
-        price_range, price_s, title, tcin, keyword = item['price_range'], item['price'], item['title'], item['id'], item['keyword']
+        price_range , price_s, title, tcin, keyword = "", "$99", item['title'], item['id'], item['keyword']
+        if 'price_range' in item:
+            price_range = item['price_range']
+        if 'price' in item:
+            price_s = item['price']
+            
         if " - " in price_range:
             lowest_s, highest_s = price_range.split(" - ")
         elif "-" in price_range:
@@ -397,17 +412,46 @@ def google_map_route(lat1,lat2,lon1,lon2):
                         retries = False)
     
     dirs = json.loads(response.data)
+    
+    # When no results can be found
+    # {'available_travel_modes': ['DRIVING', 'WALKING', 'BICYCLING'], 'geocoded_waypoints': [{}, {}], 'routes': [], 'status': 'ZERO_RESULTS'}
+    
+    if len(dirs['routes']) == 0:
+        print("!!!!!!!! Retry with driving !!!!!!")
+        # retry with driving
+        url_d = "https://maps.googleapis.com/maps/api/directions/json?origin="+str(lat1)+"%2C"+str(lon1)+"&destination="+str(lat2)+"%2C"+str(lon2)+"&key=AIzaSyBegMW_bP41xNKWlLy9Op-3U9kDHA8ABJQ"
+    
+        payload={}
+        headers = {}
+        
+        http = urllib3.PoolManager()
+        response = http.request('GET',
+                            url_d,
+                            body = payload,
+                            headers = headers,
+                            retries = False)
+        
+        dirs = json.loads(response.data)
+        
+        # if driving still doesn't work
+        if len(dirs['routes']) == 0:
+            print("!!!!!!!!! Can't find route by driving  !!!!!!!!")
+            return  {}, {}, {}
+    
+    
+    
+    
     distance = dirs['routes'][0]['legs'][0]['distance']
     duration = dirs['routes'][0]['legs'][0]['duration']
     print(distance['text'], duration['text'])
     
-    return dirs, distance, duration
+    return dirs, distance, duration 
     
 
 def lambda_handler(event, context):
-    print("==========Input==========")
+    print("==========Input==========") 
     print(event)
-    user_id, option, lat, lon = event["params"]["querystring"]["user_id"], event["params"]["querystring"]["route_option"], event["params"]["querystring"]["lat"], event["params"]["querystring"]["lon"]
+    user_id, option, lat, lon = event["queryStringParameters"]["user_id"], event["queryStringParameters"]["route_option"], float(event["queryStringParameters"]["lat"]), float(event["queryStringParameters"]["lon"])
     if option != "CHEAP":
         option = "SHORT"
     
@@ -452,7 +496,7 @@ def lambda_handler(event, context):
         route_dict.append({"brand_name":brand_name, "brand_id":brand_id, "store_id":id, "store_name":name, 
         "lat": float(store_lat), "lon":float(store_lon), "purchased_here": purchased_here_dict_list })
         
-        geo_list.append((store_lat,store_lon))
+        geo_list.append((float(store_lat),float(store_lon)))
         
     print("=================lat lon list==============")
     print(geo_list)
@@ -465,6 +509,9 @@ def lambda_handler(event, context):
     for point in route:
         distance, t2, n2, brand_id, brand_name, id, name, purchase_here = point
         dirs, distance, duration = google_map_route(t1,t2,n1,n2)
+        if not dirs:
+            t1,n1 = t2,n2
+            continue
         result.append(dirs)
         total_duration += float(duration['value'])
         total_distance += float(distance['value'])
@@ -483,10 +530,7 @@ def lambda_handler(event, context):
     print("===================route======================")
     #print(result)
     print(total_price_dollar, total_duration_min, total_distance_mile)
-    
-    # clear cart
-    response = clear_cart(user_id)
-    print(response)
+
     
     # put history
     route_string = json.dumps(route_dict)
@@ -495,13 +539,19 @@ def lambda_handler(event, context):
     
     return_results = {
         'statusCode': 200,
-        'body': {
+        'headers': {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*"
+        }, 
+        'body': json.dumps({
             "total_price_dollar": total_price_dollar,
             "total_duration_min": total_duration_min,
             "total_distance_mile": total_distance_mile,
-            "geo_list": geo_list,
+            "geo_list": geo_list, 
             "route_details": route_dict
-        }
+        })
     }
     
     return return_results

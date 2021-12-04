@@ -67,7 +67,7 @@ def insert_cart(user_id, tcin, timestamp, dynamodb=None):
 def lambda_handler(event, context):
     print("==========Input==========")
     print(event)
-    userId, tcin = event["params"]["querystring"]["user_id"],event["params"]["querystring"]["tcin"]
+    userId, tcin = event["queryStringParameters"]["user_id"],event["queryStringParameters"]["tcin"]
     now = datetime.datetime.now(tz=dateutil.tz.gettz('US/Eastern'))
     timestamp = now.strftime('%Y-%m-%dT%H:%M:%S-%Z')
     
@@ -91,5 +91,11 @@ def lambda_handler(event, context):
     
     return {
         'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*"
+        },
         'body': json.dumps(response)
     }

@@ -62,13 +62,29 @@ def get_items(tcin, dynamodb=None):
 
 
 def lambda_handler(event, context):
+    logger.debug("event: {}".format(event))
     query_string = event["queryStringParameters"]["itemName"]
     print("===============query string=========")
     print(query_string)
     
     os_results = search(query_string)
     print("===============open search results =========")
-    print(len(os_results), os_results[0])
+    print(len(os_results))
+    if len(os_results)==0: 
+        # terminate early
+        response = {
+            'statusCode': 201,
+            'headers': {
+                'Content-Type': 'application/json',
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*"
+            },
+            'body': json.dumps([])
+        }
+        return response
+         
+    print(os_results[0])
     
     item_list = []
     for os_result in os_results:
