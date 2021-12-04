@@ -154,10 +154,10 @@ function Search() {
     <>
       <Button variant="contained" type="submit" onClick={cartButtonClick}>Cart</Button>
       <Button variant="contained" type="submit" onClick={newCartButtonClick}>Start New Cart</Button>
-      {cartItems && page === "cart" &&
+      {email && idToken && cartItems && page === "cart" &&
         <div className="searchResultContainer">
           <SearchBar onChange={onChange} onClick={onClick} />
-          <Cart cartItems={cartItems} />
+          <Cart idToken={idToken} email={email} cartItems={cartItems} />
         </div>
       }
       {page === "searchBar" &&

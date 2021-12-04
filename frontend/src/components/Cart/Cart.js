@@ -9,29 +9,59 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import './Cart.css'
 
-function Cart({ cartItems }) {
+function Cart({ email, idToken, cartItems }) {
+    const routeButtonClick = async (e) => {
+    console.log(email);
+    console.log(idToken);
+        
+    const config = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": idToken
+      },
+      params: {
+        'user_id': email,
+        'lat':40.77,
+        'lon':-73.98,
+        'route_option':'CHEAP'
+      }
+    };
+
+    const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/planRoute';
+    await axios.get(url, config)
+      .then(res => {
+        console.log(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+    
+    
   return (
+    <>
     <Box className='cartResult'>
-      <nav aria-label="secondary mailbox folders">
-        <List>
-          {cartItems.item_details.map(function (d, idx) {
-            return (
-              <React.Fragment key={`listitem-${idx}`}>
+       <nav aria-label="secondary mailbox folders">
+          <List>
+             {cartItems.item_details.map(function (d, idx) {
+             return (
+             <React.Fragment key={`listitem-${idx}`}>
                 <ListItem disablePadding>
-                  <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <ListItemText style={{ marginRight: '50px' }} primary={d.title} />
-                    <ListItemText primary={d.price} />
-                    
-                  </ListItemButton>
-                  <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
+                   <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                   <ListItemText style={{ marginRight: '50px' }} primary={d.title} />
+                   <ListItemText primary={d.price} />
+                   </ListItemButton>
+                   <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
                 </ListItem>
                 <Divider />
-              </React.Fragment>
-            )
-          })}
-        </List>
-      </nav>
+             </React.Fragment>
+             )
+             })}
+          </List>
+       </nav>
     </Box>
+    <Button variant="contained" type="submit" onClick={routeButtonClick}>Plan Route</Button>
+    </>
   );
 }
 
