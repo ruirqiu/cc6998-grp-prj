@@ -15,6 +15,7 @@ function Search() {
   const [items, setItems] = useState(null);
   const [page, setPage] = useState("searchBar");
   const [cartItems, setCartItems] = useState(null);
+  const [historyItems, setHistoryItems] = useState(null);
 
   const onChange = e => {
     setQuery(e.target.value);
@@ -82,6 +83,29 @@ function Search() {
         console.log(res.data);
         setCartItems(res.data);
         setPage("cart");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  
+    const updateHistory = async (userEmail, userIdToken) => {
+    const config = {
+      headers: {
+        "Content-Type": 'application/json',
+        "Authorization": userIdToken
+      },
+      params: {
+        'userId': userEmail
+      }
+    };
+
+    const url = 'https://w3qv272dkh.execute-api.us-east-1.amazonaws.com/underdevelopment/history';
+    await axios.get(url, config)
+      .then(res => {
+        console.log(res.data);
+        setHistoryItems(res.data);
+        setPage("history");
       })
       .catch((error) => {
         console.log(error);
@@ -163,12 +187,13 @@ function Search() {
         const user_idToken = user["signInUserSession"]["idToken"]["jwtToken"];
         setIdToken(user_idToken);
         setEmail(user_email);
-        setPage("history");
+        updateHistory(user_email, user_idToken);
+        console.log("done")
       })
         .catch(err => console.log(err));
 
     } else {
-      setPage("history");
+      updateHistory(email, idToken);
     }
   };
 
@@ -214,9 +239,9 @@ function Search() {
           <SearchBar onChange={onChange} onClick={onClick} />
           <SearchResult idToken={idToken} email={email} itemList={items} />
         </div>}
-      {email && page === "history" &&
+      {email && historyItems && page === "history" &&
         <div className="searchResultContainer">
-          <History email={email} />
+          <History email={email} historyItems={historyItems}/>
         </div>}
 
     </>
