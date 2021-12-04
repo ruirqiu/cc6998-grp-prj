@@ -1,0 +1,22 @@
+
+.routeResultContainer {
+  margin-top: 50px;
+}
+
+.routeResult {
+  width: 80%;
+  margin: auto;
+  margin-top: 20px;
+  color: black;
+  background-color: white;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.imageContainer {
+  max-width: 100px;
+  max-height: 100px;
+}

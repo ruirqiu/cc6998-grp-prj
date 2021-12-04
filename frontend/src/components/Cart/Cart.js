@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState }  from 'react'
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,13 +8,15 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import './Cart.css'
+import Route from '../Route/Route'
 
 function Cart({ email, idToken, cartItems }) {
-    const routeButtonClick = async (e) => {
-    console.log(email);
-    console.log(idToken);
-        
-    const config = {
+    
+    const [routeItems, setRouteItems] = useState(null);
+    const [page, setPage] = useState(null);
+    
+    const updateRoute = async (userEmail, userIdToken) => {
+     const config = {
       headers: {
         "Content-Type": 'application/json',
         "Authorization": idToken
@@ -31,10 +33,19 @@ function Cart({ email, idToken, cartItems }) {
     await axios.get(url, config)
       .then(res => {
         console.log(res.data);
+        setRouteItems(res.data);
+        setPage("Route");
       })
       .catch((error) => {
         console.log(error);
       });
+  }
+    
+    const routeButtonClick = async (e) => {
+    console.log(email);
+    console.log(idToken);
+    updateRoute(email, idToken)
+        
   };
     
     
@@ -61,6 +72,12 @@ function Cart({ email, idToken, cartItems }) {
        </nav>
     </Box>
     <Button variant="contained" type="submit" onClick={routeButtonClick}>Plan Route</Button>
+
+    {routeItems && page === "Route" &&
+        <div className="searchResultContainer">
+          <Route routeItems={routeItems} />
+        </div>
+      }
     </>
   );
 }
