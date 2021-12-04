@@ -41,7 +41,7 @@ function Cart({ email, idToken, cartItems }) {
   const updateRoute = async (userEmail, userIdToken) => {
       
       if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
+      await navigator.geolocation.getCurrentPosition(position => {
         pos['lat'] = position.coords.latitude
         pos['lng'] = position.coords.longitude
         

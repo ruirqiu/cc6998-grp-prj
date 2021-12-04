@@ -51,6 +51,40 @@ function History({ email, historyItems }) {
           </List>
        </nav>
     </Box>
+
+    <Box className='historyResult'style={{marginBottom: "10px" }}>
+            <nav aria-label="secondary mailbox folders">
+               <List>
+                  {historyItems.instructions.map(function (in_, idx_in) {
+                     var Description_text = "From " + (in_.start_address) + " To " + (in_.end_address);
+                     var summary_distance = "Leg distance: " + (in_.distance);
+                     var summary_duration = " Leg duration: "+ (in_.duration);
+                     return (
+                        <React.Fragment key={`listitem-${idx_in}`}>
+                           <ListItem disablePadding>
+                              <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                 <ListItemText style={{ marginRight: '50px' }} primary={Description_text} />
+                                 <ListItemText secondary={summary_distance} />
+                                 <ListItemText secondary={summary_duration} />
+                                 <ListItemText primary="Detailed Steps:" />
+                                 {in_.sub_instructions.map(function (sub_in, idx_sub) {
+                                    var step_text = "Step "+(idx_sub+1)+": "+(sub_in) + " for " + (in_.sub_durations[idx_sub]);
+                                    return (
+                                       <React.Fragment key={`listitem-${idx_sub}`}>
+                                          <small> {step_text} </small>
+                                          <Divider />
+                                       </React.Fragment>
+                                    )
+                                 })}
+                              </ListItemButton>
+                           </ListItem>
+                           <Divider />
+                        </React.Fragment>
+                     )
+                  })}
+               </List>
+            </nav>
+         </Box>
 </>
   );
 }
