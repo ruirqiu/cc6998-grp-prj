@@ -50,8 +50,10 @@ def lambda_handler(event, context):
     item_details = []
     if 'items_list' in cart:
         item_list = cart['items_list']
+        statusCode = "200"
     else:
         item_list = []
+        statusCode = "201"
         
     for tcin in item_list:
         item = get_item(tcin)
@@ -66,7 +68,7 @@ def lambda_handler(event, context):
         
     cart['item_details'] = item_details
     return {
-        'statusCode': 200,
+        'statusCode': statusCode,
         'headers': {
             'Content-Type': 'application/json',
             "Access-Control-Allow-Headers": "*",
