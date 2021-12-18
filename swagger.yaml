@@ -1,280 +1,410 @@
-swagger: '2.0'
+---
+swagger: "2.0"
 info:
-  title: Find !t API
-  description: 'A one-click purchase routing planner'
-  version: 1.0.0
+  description: "A one-click purchase routing planner"
+  version: "1.0.0"
+  title: "Find !t API"
+host: "w3qv272dkh.execute-api.us-east-1.amazonaws.com"
+basePath: "/underdevelopment"
 schemes:
-  - https
-basePath: /v1
-produces:
-  - application/json
+- "https"
 paths:
-  /planRoute:
-    post:
-      summary: The endpoint to input query for a suggested route going through all the stores according to shopping list (shopping cart).
-      description: |
-        The endpoint to input query for a suggested route going through all the stores according to shopping list (shopping cart), where all the items could be purchased in a reasonabnle time and reasonable expenses. The API makes use of store inventory API and external map API from which the store we're going to and how the route is planned is implemented.
-      tags:
-        - Routing
-      operationId: route
-      produces:
-        - application/json
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/RouteRequest'
-      responses:
-        '200':
-          description: A route response
-          schema:
-            $ref: '#/definitions/RouteResponse'
-        '403':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /search:
+  /addToCart:
     get:
-      summary: The endpoint to search items which could be added to the shopping list.
-      description: |
-        The endpoint for to search items which could be added to the shopping list.
-      tags:
-        - Searching
-      operationId: searchItem
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - in: query
-          name: itemName
-          required: true
-          type: string
-        - in: query
-          name: location
-          required: true
-          type: string
+      - name: "user_id"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "tcin"
+        in: "query"
+        required: true
+        type: "string"
       responses:
-        '200':
-          description: A Search response
+        "200":
+          description: "200 response"
           schema:
-            $ref: '#/definitions/SearchResponse'
-        '403':
-          description: Unauthorized
+            $ref: "#/definitions/SearchResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        "500":
+          description: "500 response"
           schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: Unexpected error
+            $ref: "#/definitions/Error"
+        "403":
+          description: "403 response"
           schema:
-            $ref: '#/definitions/Error'
-            
+            $ref: "#/definitions/Error"
+      security:
+      - cognito_test: []
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
   /getCart:
     get:
-      summary: The endpoint to get the shopping cart of a user.
-      description: |
-        The endpoint for to search items which could be added to the shopping list.
-      tags:
-        - Get shopping cart
-      operationId: getCart
+      operationId: "getCart"
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - in: query
-          name: userID
-          required: true
-          type: string
+      - name: "userID"
+        in: "query"
+        required: true
+        type: "string"
       responses:
-        '200':
-          description: A cart response
+        "200":
+          description: "200 response"
           schema:
-            $ref: '#/definitions/Cart'
-        '403':
-          description: Unauthorized
+            $ref: "#/definitions/Cart"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        "500":
+          description: "500 response"
           schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: Unexpected error
+            $ref: "#/definitions/Error"
+        "403":
+          description: "403 response"
           schema:
-            $ref: '#/definitions/Error'
-  /addToCart:
-    post:
-      summary: The endpoint to add items to the shopping list (shopping cart).
-      description: |
-        The endpoint for to add items to the shopping list (shopping cart) with the help of DB API.
-      tags:
-        - Add to cart
-      operationId: addToCart
+            $ref: "#/definitions/Error"
+      security:
+      - cognito_test: []
+    options:
+      consumes:
+      - "application/json"
       produces:
-        - application/json
-      parameters:
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/AddRequest'
+      - "application/json"
       responses:
-        '200':
-          description: An add response
-          schema:
-            $ref: '#/definitions/AddResponse'
-        '403':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
   /history:
     get:
-      summary: The endpoint to get planning history.
-      description: |
-        The endpoint to get planning history with the help of external DB API.
-      tags:
-        - History
-      operationId: history
+      operationId: "history"
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - in: query
-          name: userId
-          required: true
-          type: string
-        - in: query
-          name: timeStamp
-          type: string
-          format: datetime
+      - name: "userId"
+        in: "query"
+        required: true
+        type: "string"
       responses:
-        '200':
-          description: A history route response
+        "200":
+          description: "200 response"
           schema:
-            $ref: '#/definitions/HistoryResponse'
-        '403':
-          description: Unauthorized
+            $ref: "#/definitions/HistoryResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        "500":
+          description: "500 response"
           schema:
-            $ref: '#/definitions/Error'
-        '500':
-          description: Unexpected error
+            $ref: "#/definitions/Error"
+        "403":
+          description: "403 response"
           schema:
-            $ref: '#/definitions/Error'
- 
+            $ref: "#/definitions/Error"
+      security:
+      - cognito_test: []
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+  /planRoute:
+    get:
+      operationId: "planRoute"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "lat"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "route_option"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "lon"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/RouteResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        "500":
+          description: "500 response"
+          schema:
+            $ref: "#/definitions/Error"
+        "403":
+          description: "403 response"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - cognito_test: []
+    post:
+      operationId: "route"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "lat"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "route_option"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "lon"
+        in: "query"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "planRouteRequest"
+        required: true
+        schema:
+          $ref: "#/definitions/planRouteRequest"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/RouteResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        "500":
+          description: "500 response"
+          schema:
+            $ref: "#/definitions/Error"
+        "403":
+          description: "403 response"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - cognito_test: []
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+  /search:
+    get:
+      operationId: "searchItem"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "itemName"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/SearchResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+        "500":
+          description: "500 response"
+          schema:
+            $ref: "#/definitions/Error"
+        "403":
+          description: "403 response"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - cognito_test: []
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+  /startNewSearch:
+    get:
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userId"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+      security:
+      - cognito_test: []
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+securityDefinitions:
+  cognito_test:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    x-amazon-apigateway-authtype: "cognito_user_pools"
 definitions:
-  RouteRequest:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/RoutingMessage'
-  RouteResponse:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/RoutingResult'
-  SearchResponse:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/SearchingResult'
-  HistoryResponse:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/RoutingResult'
-  AddRequest:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/AddMessage'
-  AddResponse:
-    type: object
-    properties:
-      messages:
-        type: array
-        items:
-          $ref: '#/definitions/AddResult'
   RoutingResult:
-    type: object
+    type: "object"
     properties:
       type:
-        type: string
+        type: "string"
       url:
-        type: string
+        type: "string"
       unstructured:
-        $ref: '#/definitions/RoutingMessage'
-  RoutingMessage:
-    type: object
-    properties:
-      userId:
-        type: string
-      planningType:
-        type: string
-      location:
-        type: string
-      timestamp:
-        type: string
-        format: datetime
+        $ref: "#/definitions/RoutingMessage"
   SearchingResult:
-    type: object
+    type: "object"
     properties:
       userId:
-        type: string
+        type: "string"
       items:
-        type: object
+        type: "object"
+        properties: {}
       timestamp:
-        type: string
-        format: datetime
-  AddResult:
-    type: object
+        type: "string"
+        format: "datetime"
+  HistoryResponse:
+    type: "object"
     properties:
-      userId:
-        type: string
-      itemKey:
-        type: string
-      timestamp:
-        type: string
-        format: datetime
-      unstructured:
-        $ref: '#/definitions/AddMessage'
-  AddMessage:
-    type: object
-    properties:
-      userId:
-        type: string
-      itemKey:
-        type: string
-      timestamp:
-        type: string
-        format: datetime
-  Cart:
-    type: object
-    properties:
-      userId:
-        type: string
-      itemKeys:
-        type: array
+      messages:
+        type: "array"
         items:
-          type: string
-      timestamp:
-        type: string
-        format: datetime
+          $ref: "#/definitions/RoutingResult"
+  planRouteRequest:
+    type: "object"
+    properties:
+      user_id:
+        type: "string"
+      route_option:
+        type: "string"
+      lat:
+        type: "number"
+      lon:
+        type: "number"
+  RouteResponse:
+    type: "object"
+    properties:
+      messages:
+        type: "array"
+        items:
+          $ref: "#/definitions/RoutingResult"
   Error:
-    type: object
+    type: "object"
     properties:
       code:
-        type: integer
-        format: int32
+        type: "integer"
+        format: "int32"
       message:
-        type: string
-   
+        type: "string"
+  RoutingMessage:
+    type: "object"
+    properties:
+      userId:
+        type: "string"
+      planningType:
+        type: "string"
+      location:
+        type: "string"
+      timestamp:
+        type: "string"
+        format: "datetime"
+  Cart:
+    type: "object"
+    properties:
+      userId:
+        type: "string"
+      itemKeys:
+        type: "array"
+        items:
+          type: "string"
+      timestamp:
+        type: "string"
+        format: "datetime"
+  SearchResponse:
+    type: "object"
+    properties:
+      messages:
+        type: "array"
+        items:
+          $ref: "#/definitions/SearchingResult"
