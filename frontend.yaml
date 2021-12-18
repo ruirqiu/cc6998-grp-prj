@@ -1,13 +1,13 @@
 version: 0.1
 phases:
-  pre_build:
-    commands:
-      - cd frontend
-      - echo Installing source NPM dependencies...
-      - yarn install
   build:
     commands:
-      - echo Build started on `date`
+      - ls -l
+      - cd frontend
+      - ls -l
+      - echo "Installing source dependencies..."
+      - yarn install
+      - echo "Building..."
       - yarn run build
 artifacts:
   files:
