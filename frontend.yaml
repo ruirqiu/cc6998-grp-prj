@@ -1,0 +1,15 @@
+version: 0.1
+phases:
+  pre_build:
+    commands:
+      - cd frontend
+      - echo Installing source NPM dependencies...
+      - yarn install
+  build:
+    commands:
+      - echo Build started on `date`
+      - yarn run build
+artifacts:
+  files:
+    - '**/*'
+  base-directory: build
