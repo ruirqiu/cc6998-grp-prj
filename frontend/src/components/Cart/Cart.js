@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -18,33 +18,34 @@ function Cart({ email, idToken, cartItems }) {
   const [routeItems, setRouteItems] = useState(null);
   const [page, setPage] = useState(null);
   const [routeSwitch, setRouteSwitch] = useState(true);
+  const [pos, setPos] = useState({ 'lat': 40, 'lng': -73 })
 
-  let pos = {
-    'lat': 40,
-    'lng': -73
-  };
-  if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
-        pos['lat'] = position.coords.latitude
-        pos['lng'] = position.coords.longitude
-        
-      }, () => {
-        // Browser supports geolocation, but user has denied permission
-        console.log("Browser supports geolocation, but user has denied permission")
-      });
-    } else {
-      // Browser doesn't support geolocation
-      console.log("Browser doesn't support geolocation")
-
-    }
-
-  const updateRoute = async (userEmail, userIdToken) => {
-      
+  useEffect(() => {
+    const defaultPos = { 'lat': 40, 'lng': -73 }
+    if (pos['lat'] === defaultPos['lat']) {
       if (navigator.geolocation) {
-      await navigator.geolocation.getCurrentPosition(position => {
-        pos['lat'] = position.coords.latitude
-        pos['lng'] = position.coords.longitude
-        
+        navigator.geolocation.getCurrentPosition(position => {
+          console.log('setting location on entry')
+          setPos({ 'lat': position.coords.latitude, 'lng': position.coords.longitude })
+
+        }, () => {
+          // Browser supports geolocation, but user has denied permission
+          console.log("Browser supports geolocation, but user has denied permission")
+        });
+      } else {
+        // Browser doesn't support geolocation
+        console.log("Browser doesn't support geolocation")
+      }
+    }
+  }, [pos])
+
+  const updateRoute = async () => {
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        console.log('update route setting location')
+        setPos({ 'lat': position.coords.latitude, 'lng': position.coords.longitude })
+
       }, () => {
         // Browser supports geolocation, but user has denied permission
         console.log("Browser supports geolocation, but user has denied permission")
@@ -54,14 +55,14 @@ function Cart({ email, idToken, cartItems }) {
       console.log("Browser doesn't support geolocation")
 
     }
-      
-    var option_text = 'SHORT'
+
+    var optionText = 'SHORT'
     if (routeSwitch) {
-        option_text= 'CHEAP'
+      optionText = 'CHEAP'
     }
-      
-    console.log(option_text)
-   
+
+    console.log(optionText)
+
     const config = {
       headers: {
         "Content-Type": 'application/json',
@@ -71,7 +72,7 @@ function Cart({ email, idToken, cartItems }) {
         'user_id': email,
         'lat': pos['lat'],
         'lon': pos['lng'],
-        'route_option': option_text
+        'route_option': optionText
       }
     };
     console.log("before request")
@@ -90,6 +91,7 @@ function Cart({ email, idToken, cartItems }) {
   }
 
   const routeButtonClick = async (e) => {
+    e.preventDefault()
     console.log(email);
     console.log(idToken);
     updateRoute(email, idToken)
@@ -97,6 +99,7 @@ function Cart({ email, idToken, cartItems }) {
   };
 
   const handleSwitchChange = async (e) => {
+    e.preventDefault()
     setRouteSwitch(e.target.checked);
   };
 
@@ -104,7 +107,7 @@ function Cart({ email, idToken, cartItems }) {
 
   return (
     <>
-      
+
       <div>{summary_text}</div>
       <Box className='cartResult'>
         <nav aria-label="secondary mailbox folders">
