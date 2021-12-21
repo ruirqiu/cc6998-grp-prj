@@ -10,12 +10,29 @@ logger.setLevel(logging.DEBUG)
 
 region = 'us-east-1'
 service = 'es'
-
+STORE_BRAND = ['Whole Foods', 'Wegmans Store','Wine Store','Trader Joes', 'Target', 'Walmart' ]
+keywords = [ 'rice', 'egg','water', 'coffee', 'ham','tea','bread',  'milk', 'coke','banana',
+    'blueberry','blackberry','mango','oil','salt', 'pepper','sugar','baking sheet','tin roll','foil',
+    'syrup','honey','flower','flour','paper','cranberry','lemon','corn', 'cucumber','potato',
+    'carrot','cauliflower','broccoli', 'beans', 'mushroom','pear', 'pasta','lettuce', 'asparagus', 'onion',
+    'cabbage','dressing','pen','butter','cheese','juice', 'bear', 'beer', 'wine', 'shirt',
+    'raspberry', 'strawberry', 'screwdriver', 'wrench', 'soap', 'soup', 'towel', 'pistol', 'bag', 'fork',
+    'pan','watch','cookware']
+          
+# TODO hardcoded now
+STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords[5:45], 'Whole Foods':keywords[20:60],
+        'Trader Joes':keywords[:15],'Wegmans Store':keywords[13:30], 'Wine Store':['water','tea','coffee','syrup','honey','lemon','juice','beer','wine'] }
+def get_store(keyword, dynamodb=None):
+    store_list = []
+    for store in STORE_BRAND:
+        if keyword in STORE_KEYWORD_MAPPING[store]:
+            store_list.append(store)
+    return store_list
 
 def search(text):
     url = 'https://search-item-search-dqlmodc2m5iid3hfibwvx3egkq.us-east-1.es.amazonaws.com/_search'
     params = {
-          "size": 20,
+          "size": 30,
           "query": {
             "multi_match": {
               "query": text,
@@ -96,6 +113,9 @@ def lambda_handler(event, context):
                 
             if 'description' in merchandise['Item']:
                 merchandise['Item']['description'] = list(merchandise['Item']['description'])
+            if 'keyword' in merchandise['Item']:
+                store_list = get_store(merchandise['Item']['keyword'])
+                merchandise['Item']['store_list'] = store_list
             item_list.append(merchandise['Item'])
     print("===============dynamodb results =========")
     print(len(item_list), item_list)

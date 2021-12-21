@@ -72,6 +72,11 @@ function SearchResult({ email, idToken, itemList }) {
       <nav aria-label="secondary mailbox folders">
         <List>
           {itemList.map(function (d, idx) {
+            var store_text = "Available at: "
+              for (let i = 0; i < d.store_list.length-1; i++) {
+                  store_text += d.store_list[i] +", "
+              }  
+              store_text += d.store_list[d.store_list.length-1]
             return (
               <React.Fragment key={`listitem-${idx}`}>
                 <ListItem style={{ display: 'flex', alignItems: 'flex-start' }} disablePadding>
@@ -79,6 +84,7 @@ function SearchResult({ email, idToken, itemList }) {
                     <ListItemText style={{ marginRight: '50px' }} disableTypography
                       primary={<Typography style={{ fontWeight: 'bold' }}>{d.title}</Typography>} />
                     <ListItemText primary={`Price range: ${d.price_range}`} />
+                    <ListItemText secondary={store_text} />
                     <div style={{ marginTop: '5px', marginBottom: '10px' }}>
                       {d.description
                         .map(function (dest, di) {
