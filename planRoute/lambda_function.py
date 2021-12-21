@@ -15,27 +15,28 @@ import dateutil.tz
 # approximate radius of earth in km
 R = 6373.0
 
-STORE_RANGE = 20
+STORE_RANGE = 40
 LAT_RANGE = 0.25
 LON_RANGE = 0.5
 
 STORE_BRAND = ['Whole Foods', 'Wegmans Store','Wine Store','Trader Joes', 'Target', 'Walmart' ]
-keywords = [ 'pear', 'pen','water', 'coffee', 'ham','tea','bread',  'milk', 'cranberry','banana',
+keywords = [ 'rice', 'egg','water', 'coffee', 'ham','tea','bread',  'milk', 'coke','banana',
     'blueberry','blackberry','mango','oil','salt', 'pepper','sugar','baking sheet','tin roll','foil',
-    'syrup','honey','flower','flour','paper','pan','lemon','corn', 'cucumber','potato',
-    'carrot','cauliflower','broccoli', 'beans', 'mushroom','rice', 'pasta','lettuce', 'asparagus', 'onion',
-    'cabbage','dressing','egg','butter','cheese','juice', 'bear', 'beer', 'wine', 'shirt',
-    'raspberry', 'strawberry', 'screwdriver', 'wrench', 'soap', 'soup', 'towel', 'pistol', 'bag', 'fork']
+    'syrup','honey','flower','flour','paper','cranberry','lemon','corn', 'cucumber','potato',
+    'carrot','cauliflower','broccoli', 'beans', 'mushroom','pear', 'pasta','lettuce', 'asparagus', 'onion',
+    'cabbage','dressing','pen','butter','cheese','juice', 'bear', 'beer', 'wine', 'shirt',
+    'raspberry', 'strawberry', 'screwdriver', 'wrench', 'soap', 'soup', 'towel', 'pistol', 'bag', 'fork',
+    'pan','watch','cookware']
           
 # TODO hardcoded now
-STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords[:45], 'Whole Foods':keywords[20:40],
+STORE_KEYWORD_MAPPING={'Walmart': keywords, 'Target': keywords[5:45], 'Whole Foods':keywords[20:60],
         'Trader Joes':keywords[:15],'Wegmans Store':keywords[13:30], 'Wine Store':['water','tea','coffee','syrup','honey','lemon','juice','beer','wine'] }
 
 # Walmart lowest for first 40, same last 6
 # Wegman highest for all
 # Target correct price
 # Whole Foods + 0.9
-#  Trader Joes (0.7*h+0.3l)
+# Trader Joes (0.7*h+0.3l)
 
 def distance_in_km(lat1, lon1, lat2, lon2):
     lat1_ = radians(lat1)
@@ -279,10 +280,11 @@ def find_cheapest(item_details, short_list):
         else:
             lowest_s, highest_s = price_range, price_range
             
-        lowest, highest, price = float(lowest_s.strip("$")), float(highest_s.strip("$")), float(price_s.strip("$"))
+        lowest, highest, price = round(float(lowest_s.strip("$")),2), round(float(highest_s.strip("$")),2), round(float(price_s.strip("$")),2)
         
         # sort price based on low to high using brand
         price_chart = compare_price(lowest, highest, price, keyword)
+        
         
         # process stores near user, already sorted based on distance
         store_by_brand = {'Whole Foods':[], 'Wegmans Store':[],'Wine Store':[],'Trader Joes':[], 'Target':[], 'Walmart':[]}
@@ -290,6 +292,9 @@ def find_cheapest(item_details, short_list):
             # (distance, lat2, lon2, brand_id, brand_name, id, name)
             brand = store[4]
             store_by_brand[brand].append(store)
+            
+        print("!!!!!!!!!!!!!!!!!!!!!")
+        print(store_by_brand)
             
         # go through price chart, see if the brand with the lowest price can be found in nearby store list
         # if not, check the next one
@@ -354,7 +359,7 @@ def find_shortest(item_details, short_list):
             lowest_s, highest_s = price_s, price_s
         else:
             lowest_s, highest_s = price_range, price_range
-        lowest, highest, price = float(lowest_s.strip("$")), float(highest_s.strip("$")), float(price_s.strip("$"))
+        lowest, highest, price = round(float(lowest_s.strip("$")),2), round(float(highest_s.strip("$")),2), round(float(price_s.strip("$")),2)
         
         # find price of each item based on brand
         # price_map_ = {brand: price}
@@ -440,7 +445,7 @@ def google_map_route(lat1,lat2,lon1,lon2):
             return  {}, {}, {},"","","",[],[]
     
     
-    print("HIIIII ")
+    print("################dirs #####")
     print(dirs)
     distance = dirs['routes'][0]['legs'][0]['distance']
     duration = dirs['routes'][0]['legs'][0]['duration']
@@ -485,7 +490,7 @@ def lambda_handler(event, context):
     print("===============store list example========")
     print(store_list[0])
     
-    # get closest 20 stores
+    # get closest 40 stores
     short_list = get_closest(lat, lon, store_list) 
     print("===============store short list example========")
     print(short_list[0])
@@ -503,7 +508,7 @@ def lambda_handler(event, context):
         distance, store_lat, store_lon, brand_id, brand_name, id, name, purchase_here = point
         purchased_here_dict_list = []
         for merchandise, merchandise_price in purchase_here:
-            purchased_here_dict_list.append({"item_id":merchandise, "price": float(merchandise_price)})
+            purchased_here_dict_list.append({"item_id":merchandise, "price": round(float(merchandise_price),2)})
         
         route_dict.append({"brand_name":brand_name, "brand_id":brand_id, "store_id":id, "store_name":name, 
         "lat": float(store_lat), "lon":float(store_lon), "purchased_here": purchased_here_dict_list })
@@ -563,7 +568,7 @@ def lambda_handler(event, context):
     
     # convert to east to read units
     total_duration_min = str(int(total_duration/60))+ " min"
-    total_distance_mile = str(int(total_distance/1000)) + " km" 
+    total_distance_mile = str(int(total_distance/1609)) + " mile" 
     total_price_dollar = "$"+ str("{:.2f}".format(total_price)) 
     
     print("===================route======================")

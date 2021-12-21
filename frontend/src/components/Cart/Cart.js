@@ -113,12 +113,18 @@ function Cart({ email, idToken, cartItems }) {
         <nav aria-label="secondary mailbox folders">
           <List>
             {cartItems.item_details.map(function (d, idx) {
+              var store_text = "Available at: "
+              for (let i = 0; i < d.store_list.length-1; i++) {
+                  store_text += d.store_list[i] +", "
+              }  
+              store_text += d.store_list[d.store_list.length-1]
               return (
                 <React.Fragment key={`listitem-${idx}`}>
                   <ListItem disablePadding>
                     <ListItemButton style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                       <ListItemText style={{ marginRight: '50px' }} primary={d.title} />
                       <ListItemText primary={d.price_range} />
+                      <ListItemText secondary={store_text} />
                     </ListItemButton>
                     <img className="imageContainer" src={d.image_url} alt={d.keyword}></img>
                   </ListItem>
