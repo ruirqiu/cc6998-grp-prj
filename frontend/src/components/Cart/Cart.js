@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -20,24 +20,22 @@ function Cart({ email, idToken, cartItems }) {
   const [routeSwitch, setRouteSwitch] = useState(true);
   const [pos, setPos] = useState({ 'lat': 40, 'lng': -73 })
 
-  useEffect(() => {
-    const defaultPos = { 'lat': 40, 'lng': -73 }
-    if (pos['lat'] === defaultPos['lat']) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          console.log('setting location on entry')
-          setPos({ 'lat': position.coords.latitude, 'lng': position.coords.longitude })
+  const defaultPos = { 'lat': 40, 'lng': -73 }
+  if (pos['lat'] === defaultPos['lat']) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        console.log('setting location on entry')
+        setPos({ 'lat': position.coords.latitude, 'lng': position.coords.longitude })
 
-        }, () => {
-          // Browser supports geolocation, but user has denied permission
-          console.log("Browser supports geolocation, but user has denied permission")
-        });
-      } else {
-        // Browser doesn't support geolocation
-        console.log("Browser doesn't support geolocation")
-      }
+      }, () => {
+        // Browser supports geolocation, but user has denied permission
+        console.log("Browser supports geolocation, but user has denied permission")
+      });
+    } else {
+      // Browser doesn't support geolocation
+      console.log("Browser doesn't support geolocation")
     }
-  }, [pos])
+  }
 
   const updateRoute = async () => {
 
